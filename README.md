@@ -10,7 +10,7 @@ Design the following database schema containing three tables:
 
 * **department**:
 
-  * **id** - INT PRIMARY KEY
+  * **id** - INT PRIMARY KEY *Foreign key for role table*
   * **name** - VARCHAR(30) to hold department name
 
 * **role**:
