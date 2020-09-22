@@ -82,11 +82,30 @@ function employeeSearch() {
     .prompt({
         name: "employee",
         type: "input",
-        message: "Please enter the first and last name of employee you wish to search:"
+        message: "Please enter the name of the employee you wish to search"
     })
     .then(function(answer) {
-        console.log(answer.employee);
-        connection.query("SELECT * FROM employee ", {employee: answer.employee}, function(err, res) {
+        var query = "SELECT first name, last name, FROM employee";
+        connection.query(query, { employeet: answer.employee }, function(err, res) {
+          for (var i = 0; i < res.length; i++) {
+            console.log("First Name: " + res[i].first_name + " || Last Name: " + res[i].last_name);
+          }
+          runSearch();
+        });
+      });
+
+}
+
+function empRoleSearch() {
+    inquirer
+    .prompt({
+        name: "role",
+        type: "input",
+        message: "Please enter the role you'd like to review"
+    })
+    .then(function(answer) {
+        console.log(answer.role);
+        connection.query("SELECT * FROM employee ", {role: answer.role}, function(err, res) {
             console.log(
                 "First Name: " +
                 res[0].first_name +
