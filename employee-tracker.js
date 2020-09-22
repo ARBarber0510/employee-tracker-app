@@ -14,7 +14,7 @@ var connection = mysql.createConnection({
   
     // Your password
     password: "Sea91Mar0510!",
-    database: ""
+    database: "employee_trackerDB"
 });
 
 // connect to the mysql server and sql database
@@ -27,10 +27,10 @@ function runSearch() {
     inquirer
       .prompt({
         name: "action",
-        type: "list",
+        type: "rawlist",
         message: "What would you like to do?",
         choices: [
-          "View employee by name",
+          "View all employees",
           "View all employees by role",
           "View all employees by department",
           "Add employee",
@@ -42,8 +42,8 @@ function runSearch() {
       })
       .then(function(answer) {
         switch (answer.action) {
-        case "View employee by name":
-          employeeSearch();
+        case "View all employees":
+          viewAllEmployees();
           break;
   
         case "View all employees by role":
@@ -77,23 +77,17 @@ function runSearch() {
       });
 }
 
-function employeeSearch() {
-    inquirer
-    .prompt({
-        name: "employee",
-        type: "input",
-        message: "Please enter the name of the employee you wish to search"
-    })
-    .then(function(answer) {
-        var query = "SELECT first name, last name, FROM employee";
-        connection.query(query, { employeet: answer.employee }, function(err, res) {
-          for (var i = 0; i < res.length; i++) {
-            console.log("First Name: " + res[i].first_name + " || Last Name: " + res[i].last_name);
-          }
-          runSearch();
-        });
-      });
+function viewAllEmployees() {
+    var query = "SELECT * FROM employees"
 
+    connection.query(query, function(err, res) {
+
+        if (err) throw err;
+
+        console.table(res);
+
+        runSearch();
+    });
 }
 
 function empRoleSearch() {
