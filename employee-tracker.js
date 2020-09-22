@@ -108,3 +108,72 @@ function empDeptSearch() {
     });
 }
 
+var roleArr = [];
+function selectRole() {
+    connection.query("SELECT * FROM role", function(err, res) {
+        if (err) throw err
+        for (var i = 0; i < res.length; i++) {
+            roleArr.push(res[i].title);
+        }
+    })
+    return roleArr;
+}
+
+var managerArr = [];
+function selectManager() {
+    connection.query("SELECT first_name, last_name FROM employee WHERE manager_id IS NULL", function(err, res) {
+        if (err) throw err
+        for (var i = 0; i < res.length; i++) {
+            managerArr.push(res[i].first_name);
+        }
+    })
+    return managerArr;
+}
+
+function addEmployee() {
+    inquirer
+    .prompt([
+        {
+            name:"firstName",
+            type:"input",
+            message: "Enter employee's first name:"
+        },
+        {
+            name:"lastName",
+            type:"input",
+            message: "Enter employee's last name:"
+        },
+        {
+            name:"empDept",
+            type:"input",
+            message: "Enter employee's department:"
+        },
+        {
+            name:"empRole",
+            type:"input",
+            message: "Enter employee's role:"
+        }, 
+        {
+            name: "choice",
+            type: "rawlist",
+            message: "Select managers name:",
+            choices: selectManager()
+        }
+    ]).then(function(val) {
+        var roleId = selectRole().indexOf(val.role) + 1
+        var managerId = selectManager().indexOf(val.choice) + 1
+        connection.query("INSERT INTO employee SET ?",
+        {
+            first_name: val.firstName,
+            last_name: val.lastName,
+            manager_id: managerId,
+            role_id: roleId
+        },     
+        function(err) {
+            if (err) throw err
+            console.table(val)
+            runSearch()
+        })
+    })
+}
+
