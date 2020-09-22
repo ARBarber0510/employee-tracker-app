@@ -78,7 +78,7 @@ function runSearch() {
 }
 
 function viewAllEmployees() {
-    var query = "SELECT * FROM employees"
+    var query = "SELECT * FROM employee"
 
     connection.query(query, function(err, res) {
 
@@ -91,25 +91,20 @@ function viewAllEmployees() {
 }
 
 function empRoleSearch() {
-    inquirer
-    .prompt({
-        name: "role",
-        type: "input",
-        message: "Please enter the role you'd like to review"
-    })
-    .then(function(answer) {
-        console.log(answer.role);
-        connection.query("SELECT * FROM employee ", {role: answer.role}, function(err, res) {
-            console.log(
-                "First Name: " +
-                res[0].first_name +
-                "Last Name: " +
-                res[0].last_name +
-                "Role: " +
-                res[0].role_id
-            );
+        connection.query("SELECT employee.first_name, employee.last_name, role.title AS Title FROM employee JOIN role ON employee.role_id = role.id;", 
+        function(err, res) {
+            if (err) throw err
+            console.table(res)
             runSearch();
         });
+}
+
+function empDeptSearch() {
+    connection.query("SELECT employee.first_name, employee.last_name, department.dept_name AS Department FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id ORDER BY employee.id;", 
+    function(err, res) {
+        if (err) throw err
+        console.table(res)
+        runSearch();
     });
 }
 
