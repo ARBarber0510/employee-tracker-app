@@ -30,7 +30,7 @@ function runSearch() {
         type: "list",
         message: "What would you like to do?",
         choices: [
-          "View all employees",
+          "View employee by name",
           "View all employees by role",
           "View all employees by department",
           "Add employee",
@@ -42,7 +42,7 @@ function runSearch() {
       })
       .then(function(answer) {
         switch (answer.action) {
-        case "View all employees":
+        case "View employee by name":
           employeeSearch();
           break;
   
@@ -75,5 +75,28 @@ function runSearch() {
           break;
         }
       });
-  }
+}
+
+function employeeSearch() {
+    inquirer
+    .prompt({
+        name: "employee",
+        type: "input",
+        message: "Please enter the first and last name of employee you wish to search:"
+    })
+    .then(function(answer) {
+        console.log(answer.employee);
+        connection.query("SELECT * FROM employee ", {employee: answer.employee}, function(err, res) {
+            console.log(
+                "First Name: " +
+                res[0].first_name +
+                "Last Name: " +
+                res[0].last_name +
+                "Role: " +
+                res[0].role_id
+            );
+            runSearch();
+        });
+    });
+}
 
