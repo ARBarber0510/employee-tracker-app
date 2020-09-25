@@ -1,6 +1,7 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
 var consoleTable = require("console.table");
+const { fetchAsyncQuestionPropertyQuestionProperty } = require("inquirer/lib/utils/utils");
 
 // create the connection information for the sql database
 var connection = mysql.createConnection({
@@ -76,20 +77,21 @@ function runSearch() {
         }
       });
 }
-
+// View all employees currently entered. 
 function viewAllEmployees() {
     var query = "SELECT * FROM employee"
 
     connection.query(query, function(err, res) {
-
         if (err) throw err;
 
-        console.table(res);
-
+        for (var i =0; i < res.length; i++) {
+            console.log(res[i].id + " | " + res[i].first_name + " | " + res[i].last_name);
+        }
         runSearch();
     });
 }
-
+// Want to search for employee based on role. Currently showing each employee and their roles. 
+// Want to include ""
 function empRoleSearch() {
         connection.query("SELECT employee.first_name, employee.last_name, role.title AS Title FROM employee JOIN role ON employee.role_id = role.id;", 
         function(err, res) {
@@ -99,6 +101,7 @@ function empRoleSearch() {
         });
 }
 
+// Want to search employees based on department.
 function empDeptSearch() {
     connection.query("SELECT employee.first_name, employee.last_name, department.dept_name AS Department FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id ORDER BY employee.id;", 
     function(err, res) {
@@ -106,28 +109,6 @@ function empDeptSearch() {
         console.table(res)
         runSearch();
     });
-}
-
-var roleArr = [];
-function selectRole() {
-    connection.query("SELECT * FROM role", function(err, res) {
-        if (err) throw err
-        for (var i = 0; i < res.length; i++) {
-            roleArr.push(res[i].title);
-        }
-    })
-    return roleArr;
-}
-
-var managerArr = [];
-function selectManager() {
-    connection.query("SELECT first_name, last_name FROM employee WHERE manager_id IS NULL", function(err, res) {
-        if (err) throw err
-        for (var i = 0; i < res.length; i++) {
-            managerArr.push(res[i].first_name);
-        }
-    })
-    return managerArr;
 }
 
 function addEmployee() {
@@ -144,36 +125,60 @@ function addEmployee() {
             message: "Enter employee's last name:"
         },
         {
-            name:"empDept",
-            type:"input",
-            message: "Enter employee's department:"
-        },
-        {
             name:"empRole",
             type:"input",
-            message: "Enter employee's role:"
+            message: "Enter employee's role ID:"
         }, 
         {
-            name: "choice",
-            type: "rawlist",
-            message: "Select managers name:",
+            name: "empMgr",
+            type: "choice",
+            message: "Enter manager ID:",
             choices: selectManager()
         }
-    ]).then(function(val) {
-        var roleId = selectRole().indexOf(val.role) + 1
-        var managerId = selectManager().indexOf(val.choice) + 1
-        connection.query("INSERT INTO employee SET ?",
-        {
-            first_name: val.firstName,
-            last_name: val.lastName,
-            manager_id: managerId,
-            role_id: roleId
-        },     
-        function(err) {
-            if (err) throw err
-            console.table(val)
-            runSearch()
-        })
-    })
-}
+    ]).then(function(answer) {
 
+        connection.query("INSERT INTO employee SET ?", 
+        {
+            first_name: answer.firstName,
+            last_name: answer.lastName,
+            role_id: answer.empRole,
+            manager_id: answer.empMgr
+        }, 
+        function(err, res) {
+            if (err) throw err;
+            console.table(res);
+            runSearch();
+        });
+        
+    });
+};
+
+function addRole() {
+    inquirer
+        .prompt([
+            {
+                name: "roleName",
+                type: "input",
+                message: "Please enter role name:",
+
+            },
+            {
+                name: "salary",
+                type: "input",
+                message: "Please enter role salary:"
+            },
+            {
+                name: "deptId",
+                type: "input",
+                message: "Please enter department ID:"
+            }
+        ])
+        .then(function (answer) {
+
+            connection.query("INSERT INTO role (title, salary, department_id,) VALUES (?, ?, ?)", [answer.roleName, answer.salary, answer.deptId], function (err, res) {
+                if (err) throw err;
+                console.table(res);
+                runSearch();
+            })
+    });
+};
