@@ -184,29 +184,27 @@ function addRole() {
 };
 
 function addDept() {
-
-
     inquirer.prompt([
         {
       
         type: "input",
-        message: "What is the name of the department?",
+        message: "Please enter department name:",
         name: "deptName"
-        },
-        {
-            name: "deptId",
-            type: "input",
-            message: "Please enter department ID:"
         }
     ]).then(function(answer){
 
-        connection.query("INSERT INTO department (name) VALUES (?)", [answer.deptName] , function(err, res) {
+        connection.query("INSERT INTO department SET ?", 
+        {
+            dept_name: answer.deptName
+        }, 
+        function(err, res) {
             if (err) throw err;
             console.table(res)
             runSearch();
         });
     });
 }
+
 function updateEmpRole() {
     inquirer
       .prompt([
