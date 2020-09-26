@@ -128,12 +128,6 @@ function addEmployee() {
             name:"empRole",
             type:"input",
             message: "Enter employee's role ID:"
-        }, 
-        {
-            name: "empMgr",
-            type: "choice",
-            message: "Enter manager ID:",
-            choices: selectManager()
         }
     ]).then(function(answer) {
 
@@ -157,7 +151,7 @@ function addRole() {
     inquirer
         .prompt([
             {
-                name: "roleName",
+                name: "title",
                 type: "input",
                 message: "Please enter role name:",
 
@@ -175,7 +169,13 @@ function addRole() {
         ])
         .then(function (answer) {
 
-            connection.query("INSERT INTO role (title, salary, department_id,) VALUES (?, ?, ?)", [answer.roleName, answer.salary, answer.deptId], function (err, res) {
+            connection.query("INSERT INTO role SET ?", 
+            {
+               title: answer.title, 
+               salary: answer.salary, 
+               department_id: answer.deptId
+            
+            }, function (err, res) {
                 if (err) throw err;
                 console.table(res);
                 runSearch();
@@ -186,13 +186,19 @@ function addRole() {
 function addDept() {
 
 
-    inquirer.prompt({
+    inquirer.prompt([
+        {
       
         type: "input",
         message: "What is the name of the department?",
         name: "deptName"
-
-    }).then(function(answer){
+        },
+        {
+            name: "deptId",
+            type: "input",
+            message: "Please enter department ID:"
+        }
+    ]).then(function(answer){
 
         connection.query("INSERT INTO department (name) VALUES (?)", [answer.deptName] , function(err, res) {
             if (err) throw err;
