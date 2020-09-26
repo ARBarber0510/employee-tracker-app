@@ -1,7 +1,7 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
 var consoleTable = require("console.table");
-const { fetchAsyncQuestionPropertyQuestionProperty } = require("inquirer/lib/utils/utils");
+// const { fetchAsyncQuestionPropertyQuestionProperty } = require("inquirer/lib/utils/utils");
 
 // create the connection information for the sql database
 var connection = mysql.createConnection({
@@ -182,3 +182,49 @@ function addRole() {
             })
     });
 };
+
+function addDept() {
+
+
+    inquirer.prompt({
+      
+        type: "input",
+        message: "What is the name of the department?",
+        name: "deptName"
+
+    }).then(function(answer){
+
+        connection.query("INSERT INTO department (name) VALUES (?)", [answer.deptName] , function(err, res) {
+            if (err) throw err;
+            console.table(res)
+            runSearch();
+        });
+    });
+}
+function updateEmpRole() {
+    inquirer
+      .prompt([
+        {
+          type: "input",
+          message: "Which employee would you like to update?",
+          name: "empUpdate"
+        },
+  
+        {
+          type: "input",
+          message: "What do you want to update to?",
+          name: "updateRole"
+        }
+      ])
+      .then(function(answer) {
+        // let query = `INSERT INTO department (name) VALUES ("${answer.deptName}")`
+        //let query = `'UPDATE employee SET role_id=${answer.updateRole} WHERE first_name= ${answer.eeUpdate}`;
+        //console.log(query);
+  
+        connection.query('UPDATE employee SET role_id=? WHERE first_name= ?',[answer.updateRole, answer.empUpdate],function(err, res) {
+          if (err) throw err;
+          console.table(res);
+          runSearch();
+        });
+      });
+  }
