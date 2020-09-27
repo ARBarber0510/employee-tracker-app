@@ -32,8 +32,8 @@ function runSearch() {
             message: "What would you like to do?",
             choices: [
                 "View all employees",
-                "View all employees by role",
-                "View all employees by department",
+                "View all roles",
+                "View all departments",
                 "Add employee",
                 "Add role",
                 "Add department",
@@ -47,12 +47,12 @@ function runSearch() {
                     viewAllEmployees();
                     break;
 
-                case "View all employees by role":
-                    empRoleSearch();
+                case "View all roles":
+                    roleSearch();
                     break;
 
-                case "View all employees by department":
-                    empDeptSearch();
+                case "View all departments":
+                    deptSearch();
                     break;
 
                 case "Add employee":
@@ -92,17 +92,26 @@ function viewAllEmployees() {
 }
 // Want to search for employee based on role. Currently showing each employee and their roles. 
 // Want to include ""
-function empRoleSearch() {
-    connection.query("SELECT employee.first_name, employee.last_name, role.title AS Title FROM employee JOIN role ON employee.role_id = role.id;",
-        function (err, res) {
-            if (err) throw err
-            console.table(res)
-            runSearch();
+function roleSearch() {
+    inquirer
+    .prompt({
+        name: "role",
+        type: "input",
+        message: "Please enter the role you'd like to review:"
+    })
+    .then(function(answer) {
+        var query = "SELECT * FROM role";
+        connection.query(query, {title: answer.role}, function(err, res) {
+            for (var i = 0; i < res.length; i++) {
+                console.log("Title: " + res[i].title + " || Salary: " + res[i].salary + " || Department ID: " + res[i].department_id);
+              }
+              runSearch();
         });
+    });
 }
 
 // Want to search employees based on department.
-function empDeptSearch() {
+function deptSearch() {
     connection.query("SELECT employee.first_name, employee.last_name, department.dept_name AS Department FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id ORDER BY employee.id;",
         function (err, res) {
             if (err) throw err
@@ -208,7 +217,7 @@ function addDept() {
 
 // Write functions to  
 function updateEmpRole() {
-    connection.query("SELECT * FROM employee", function (err, results) {
+    connection.query("SELECT * FROM employee", function (err, res) {
         if (err) throw err;
 
         inquirer
@@ -218,8 +227,8 @@ function updateEmpRole() {
                     type: "rawlist",
                     choices: function () {
                         var choiceArray = [];
-                        for (var i = 0; i < results.length; i++) {
-                            choiceArray.push(results[i].first_name + " " + results[i].last_name);
+                        for (var i = 0; i < res.length; i++) {
+                            choiceArray.push(res[i].first_name + " " + res[i].last_name);
                         }
                         return choiceArray;
                     },
