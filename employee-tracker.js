@@ -32,8 +32,8 @@ function runSearch() {
             message: "What would you like to do?",
             choices: [
                 "View all employees",
-                "View all roles",
-                "View all departments",
+                "View roles",
+                "View departments",
                 "Add employee",
                 "Add role",
                 "Add department",
@@ -43,28 +43,28 @@ function runSearch() {
         })
         .then(function (answer) {
             switch (answer.action) {
+                case "View departments":
+                    viewAllDepts();
+                    break;
+
+                case "View roles":
+                    viewAllRoles();
+                    break;
+
                 case "View all employees":
                     viewAllEmployees();
                     break;
-
-                case "View all roles":
-                    roleSearch();
-                    break;
-
-                case "View all departments":
-                    deptSearch();
-                    break;
-
-                case "Add employee":
-                    addEmployee();
+                
+                case "Add department":
+                    addDept();
                     break;
 
                 case "Add role":
                     addRole();
                     break;
-
-                case "Add department":
-                    addDept();
+                
+                case "Add employee":
+                    addEmployee();
                     break;
 
                 case "Update employee role":
@@ -77,6 +77,34 @@ function runSearch() {
             }
         });
 }
+
+// Want to search employees based on department.
+function viewAllDepts() {
+    var query = "SELECT * FROM department"
+
+    connection.query(query, function (err, res) {
+        if (err) throw err;
+
+        for (var i = 0; i < res.length; i++) {
+            console.log("ID: " + res[i].id + " | Name: " + res[i].dept_name);
+        }
+        runSearch();
+    });
+}
+
+function viewAllRoles() {
+    var query = "SELECT * FROM role"
+
+    connection.query(query, function (err, res) {
+        if (err) throw err;
+
+        for (var i = 0; i < res.length; i++) {
+            console.log("Role ID: " + res[i].id + " | Title: " + res[i].title + " | Salary: " + res[i].salary + " | Department ID: " + res[i].department_id);
+        }
+        runSearch();
+    });
+}
+
 // View all employees currently entered. 
 function viewAllEmployees() {
     var query = "SELECT * FROM employee"
@@ -90,70 +118,27 @@ function viewAllEmployees() {
         runSearch();
     });
 }
-// Want to search for employee based on role. Currently showing each employee and their roles. 
-// Want to include ""
-function roleSearch() {
-    inquirer
-    .prompt({
-        name: "role",
-        type: "input",
-        message: "Please enter the role you'd like to review:"
-    })
-    .then(function(answer) {
-        var query = "SELECT * FROM role";
-        connection.query(query, {title: answer.role}, function(err, res) {
-            for (var i = 0; i < res.length; i++) {
-                console.log("Title: " + res[i].title + " || Salary: " + res[i].salary + " || Department ID: " + res[i].department_id);
-              }
-              runSearch();
-        });
+
+function addDept() {
+    inquirer.prompt([
+        {
+
+            type: "input",
+            message: "Please enter department name:",
+            name: "deptName"
+        }
+    ]).then(function (answer) {
+
+        connection.query("INSERT INTO department SET ?",
+            {
+                dept_name: answer.deptName
+            },
+            function (err, res) {
+                if (err) throw err;
+                console.table(res)
+                runSearch();
+            })
     });
-}
-
-// Want to search employees based on department.
-function deptSearch() {
-    connection.query("SELECT employee.first_name, employee.last_name, department.dept_name AS Department FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id ORDER BY employee.id;",
-        function (err, res) {
-            if (err) throw err
-            console.table(res)
-            runSearch();
-        });
-}
-
-function addEmployee() {
-    inquirer
-        .prompt([
-            {
-                name: "firstName",
-                type: "input",
-                message: "Enter employee's first name:"
-            },
-            {
-                name: "lastName",
-                type: "input",
-                message: "Enter employee's last name:"
-            },
-            {
-                name: "empRole",
-                type: "input",
-                message: "Enter employee's role ID:"
-            }
-        ]).then(function (answer) {
-
-            connection.query("INSERT INTO employee SET ?",
-                {
-                    first_name: answer.firstName,
-                    last_name: answer.lastName,
-                    role_id: answer.empRole,
-                    manager_id: answer.empMgr
-                },
-                function (err, res) {
-                    if (err) throw err;
-                    console.table(res);
-                    runSearch();
-                });
-
-        });
 };
 
 function addRole() {
@@ -192,28 +177,41 @@ function addRole() {
         });
 };
 
-function addDept() {
-    inquirer.prompt([
-        {
-
-            type: "input",
-            message: "Please enter department name:",
-            name: "deptName"
-        }
-    ]).then(function (answer) {
-
-        connection.query("INSERT INTO department SET ?",
+function addEmployee() {
+    inquirer
+        .prompt([
             {
-                dept_name: answer.deptName
+                name: "firstName",
+                type: "input",
+                message: "Enter employee's first name:"
             },
-            function (err, res) {
-                if (err) throw err;
-                console.table(res)
-                runSearch();
-            })
-    });
-};
+            {
+                name: "lastName",
+                type: "input",
+                message: "Enter employee's last name:"
+            },
+            {
+                name: "empRole",
+                type: "input",
+                message: "Enter employee's role ID:"
+            }
+        ]).then(function (answer) {
 
+            connection.query("INSERT INTO employee SET ?",
+                {
+                    first_name: answer.firstName,
+                    last_name: answer.lastName,
+                    role_id: answer.empRole,
+                    manager_id: answer.empMgr
+                },
+                function (err, res) {
+                    if (err) throw err;
+                    console.table(res);
+                    runSearch();
+                });
+
+        });
+};
 
 // Write functions to  
 function updateEmpRole() {
